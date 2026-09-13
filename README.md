@@ -36,4 +36,4 @@ Atenção: Consulte a pasta /docs para o Manual de Instalação completo.
 1. Configure as VMs no VirtualBox utilizando Ubuntu Server 22.04 e defina a rede como Host-Only.
 2. Clone o repositório:
    ```bash
-   git clone [https://github.com/SEU-USUARIO/monitoramento-data-center.git](https://github.com/SEU-USUARIO/monitoramento-data-center.git)
+   git clone [https://github.com/EduardoCorrea01/monitoramento-data-center.git](https://github.com/SEU-USUARIO/monitoramento-data-center.git)
