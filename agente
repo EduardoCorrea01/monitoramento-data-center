@@ -1,1 +1,58 @@
+import time
+import psutil
 
+# Definimos o intervalo (em segundos) entre cada verificação de uso da CPU.
+# Um valor de 1 significa que a cada 1 segundo o script vai checar o uso atual.
+INTERVALO_VERIFICACAO = 1
+
+# Definimos um limite de alerta (em porcentagem).
+# Se o uso da CPU ultrapassar este valor, um aviso será exibido no console.
+LIMITE_ALERTA_CPU = 85.0
+
+
+def monitorar_cpu():
+  """Função principal que realiza o monitoramento contínuo do uso da CPU."""
+  print("=" * 50)
+  print("INICIANDO MONITORAMENTO DE CPU")
+  print(f"Intervalo: {INTERVALO_VERIFICACAO}s | Limite de Alerta: {LIMITE_ALERTA_CPU}%")
+  print("Pressione CTRL+C para encerrar o programa.")
+  print("=" * 50)
+
+  try:
+    # Loop infinito para manter o monitoramento rodando até que o usuário interrompa
+    while True:
+      # psutil.cpu_percent() mede a porcentagem de uso geral da CPU.
+      # Passar interval=None faz com que ele pegue a leitura desde a última chamada.
+      uso_cpu = psutil.cpu_percent(interval=None)
+
+      # Coletamos também informações sobre os núcleos físicos e lógicos da CPU
+      nucleos_fisicos = psutil.cpu_count(logical=False)
+      nucleos_logicos = psutil.cpu_count(logical=True)
+
+      # Exibição básica dos dados atuais no terminal
+      print(
+          f"[MONITOR] Uso atual da CPU: {uso_cpu}% |"
+          f" Núcleos(F/L): {nucleos_fisicos}/{nucleos_logicos}"
+      )
+
+      # Estrutura condicional para verificar se o uso ultrapassou o limite de alerta
+      if uso_cpu > LIMITE_ALERTA_CPU:
+        print(
+            "⚠️ ALERTA: O uso da CPU está alto! Ultrapassou o limite de"
+            f" {LIMITE_ALERTA_CPU}%."
+        )
+
+      # Aguarda o intervalo definido antes de realizar a próxima leitura
+      time.sleep(INTERVALO_VERIFICACAO)
+
+  except KeyboardInterrupt:
+    # Captura a interrupção do usuário (Ctrl+C) para fechar o programa de forma limpa
+    print("\n")
+    print("=" * 50)
+    print("Monitoramento encerrado pelo usuário. Até logo!")
+    print("=" * 50)
+
+
+# Bloco padrão em Python para executar a função principal quando o script for chamado
+if __name__ == "__main__":
+  monitorar_cpu()
