@@ -1,39 +1,71 @@
-# 🖥️ Sistema Inteligente de Monitoramento de Data Center
+# Pulse — Monitoramento do Data Center
 
-> Projeto Integrador - 2026 | Anhanguera
-> Sistema distribuído para monitoramento, coleta, processamento, armazenamento e apresentação de métricas de uma infraestrutura de Data Center.
+Dashboard web responsivo para visualizar telemetria de CPU, memória, disco, disponibilidade e alertas de até quatro servidores.
 
-## 📋 1. Sobre o Projeto
-Este projeto tem como objetivo identificar falhas, indisponibilidades e situações que possam comprometer o desempenho dos recursos computacionais de um Data Center. O sistema coleta dados dos servidores (CPU, Memória, Disco e Rede), processa essas métricas via API e exibe alertas em um Dashboard em tempo real. 
+## Estrutura
 
-*Regras de Negócio Oficiais:*
-* ⚠️ *ALERTA:* Disparado caso o uso de CPU, Memória ou Disco ultrapasse *85%*.
-* 🔴 *OFFLINE (CRÍTICO):* Disparado se um servidor ficar mais de *2 minutos* sem enviar dados (falha de comunicação).
+- `index.html`: estrutura da interface, indicadores, gráficos e diálogos.
+- `styles.css`: tema visual, estados dos componentes e layout responsivo.
+- `app.js`: atualização da interface, gráficos, navegação, validação de limites e integração da telemetria.
+- `monitoring.js`: validação das leituras, estado de disponibilidade e ciclo de vida dos alertas.
 
-## 🛠️ 2. Arquitetura e Tecnologias
-O sistema segue uma arquitetura distribuída e modular:
-* *Infraestrutura e Virtualização:* Oracle VirtualBox / VMware (Rede Host-Only: 192.168.56.x)
-* *Sistema Operacional:* Ubuntu Server 22.04 LTS
-* *Agentes de Coleta (G1/G2):* Python (psutil, requests) via systemd/cron
-* *Backend e API (G3):* Python com framework Flask
-* *Banco de Dados:* MySQL / SQLite
-* *Frontend / Dashboard (G4):* HTML, CSS, JavaScript (Bootstrap e Chart.js)
+## Interface
 
-## 📁 3. Estrutura do Repositório
-A organização das pastas reflete a separação de responsabilidades das equipes:
+A **Visão geral** mostra indicadores, histórico da sessão, armazenamento medido, servidores e alertas. As telas **Servidores**, **Armazenamento** e **Alertas** podem ser abertas pela navegação lateral. O cartão de capacidade planejada foi removido; não confunda os limites configurados no código com métricas coletadas.
 
-- /agente - Scripts Python de coleta de dados locais nos servidores.
-- /backend - Código da API em Flask para recebimento e processamento.
-- /dashboard - Arquivos de interface gráfica (HTML, CSS, JS).
-- /banco - Scripts de modelagem e criação do banco de dados.
-- /docs - Documentação oficial, diagramas UML e manuais.
-- /testes - Roteiros de testes de integração e simulação de falhas.
+Sem telemetria, as métricas aparecem como indisponíveis. O dashboard não cria dados fictícios. O histórico de CPU/memória e os alertas só existem na memória da página e são perdidos ao recarregá-la.
 
-## 🚀 4. Como Executar o Projeto
-Atenção: Consulte a pasta /docs para o Manual de Instalação completo.
+## Configuração deste projeto
 
-*Passos básicos:*
-1. Configure as VMs no VirtualBox utilizando Ubuntu Server 22.04 e defina a rede como Host-Only.
-2. Clone o repositório:
-   ```bash
-   git clone [https://github.com/EduardoCorrea01/monitoramento-data-center.git](https://github.com/SEU-USUARIO/monitoramento-data-center.git)
+Os limites de entrada correspondem à infraestrutura informada:
+
+- Quatro servidores: três servidores e um servidor central.
+- RAM planejada: 5 GB no total (1 GB por servidor e 2 GB no central).
+- Disco: no máximo 10 GB por servidor e 40 GB no total.
+- CPUs: seis vCPUs no total.
+
+Essa capacidade planejada não é exibida como consumo medido no dashboard. Para alterar limites, atualize a configuração `serverLimits` no início de `app.js` e valide as capacidades reais dos servidores antes de ingerir telemetria.
+
+## Integrar telemetria
+
+O navegador disponibiliza `window.receiveServerTelemetry` para ser chamado por código hospedeiro já integrado ao coletor:
+
+```js
+window.receiveServerTelemetry({
+  serverId: 'servidor-01',
+  cpu: 86.2,       // percentual de 0 a 100
+  memory: 78.4,    // percentual de 0 a 100
+  diskUsed: 8.6,   // GB
+  diskTotal: 10    // GB; no maximo 10 GB por servidor
+});
+```
+
+CPU, memória e disco geram alerta crítico quando ultrapassam 85%. Um servidor sem nova leitura por mais de dois minutos é marcado offline; a verificação ocorre a cada cinco segundos, após sua primeira leitura. O painel só calcula o percentual de disco quando os quatro servidores enviam dados recentes. A média de CPU/memória é calculada entre servidores com sinal e não pondera RAM alocada.
+
+Cada abertura ou resolução de alerta emite o evento de navegador `monitoring-alert`, com os dados do alerta em `event.detail`.
+
+## Prontidão para uso real
+
+**O dashboard ainda não está apto, sozinho, para monitoramento operacional.** `window.receiveServerTelemetry` é uma função JavaScript local, não um endpoint de rede, coletor ou mecanismo autenticado. A página não conecta aos servidores, não persiste dados, não envia notificações externas e deixa de monitorar quando fechada.
+
+Para produção, é necessário implantar um coletor/backend autenticado e protegido, conectar os quatro servidores, configurar armazenamento persistente e alertas externos, e monitorar o próprio coletor. Não exponha a função do navegador como canal público de ingestão.
+
+## Executar e verificar
+
+Abra `index.html` em um navegador com acesso à internet. Bootstrap e Chart.js são carregados por CDN.
+
+Verifique a sintaxe dos scripts com Node.js:
+
+```powershell
+node --check app.js
+node --check monitoring.js
+```
+
+O teste de uso manual feito nesta alteração cobriu carregamento sem dados simulados, navegação, estado sem telemetria, inventário e notificações, agregação de leituras dos quatro servidores, alertas e recuperação, limite de quatro servidores, máximo de 10 GB por disco e layout mobile. Isso valida o dashboard e a função local de entrada; não substitui o teste de ponta a ponta com o coletor real.
+
+## Repositório e publicação
+
+- Código-fonte: [GitHub](https://github.com/gabrielmartins171223-ship-it/data-center-monitoring-system).
+- Dashboard no GitHub Pages: [abrir o dashboard](https://gabrielmartins171223-ship-it.github.io/data-center-monitoring-system/#overview).
+
+O GitHub Pages publica somente os arquivos estáticos e não recebe telemetria. Para publicar alterações, faça push para `main`; o workflow [pages.yml](https://github.com/gabrielmartins171223-ship-it/data-center-monitoring-system/blob/main/.github/workflows/pages.yml) publica a interface automaticamente.
