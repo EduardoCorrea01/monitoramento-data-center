@@ -29,6 +29,20 @@ def _percent(value, name):
     return round(number, 2)
 
 
+def _gigabytes(value, name):
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError(f"Invalid {name} value")
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"Invalid {name} value") from exc
+    if not isfinite(number) or number < 0:
+        raise ValueError(f"{name} must be a finite number greater than or equal to 0")
+    return round(number, 2)
+
+
 def _metric_timestamp(data):
     supplied = _value(data, "timestamp", "data_hora")
     if supplied is None or supplied == "":
@@ -62,6 +76,8 @@ def process_monitoring(data):
     cpu = _percent(data.get("cpu"), "cpu")
     memory = _percent(_value(data, "memory", "memoria"), "memory")
     disk = _percent(_value(data, "disk", "disco"), "disk")
+    disk_total_gb = _gigabytes(data.get("disk_total_gb"), "disk_total_gb")
+    disk_used_gb = _gigabytes(data.get("disk_used_gb"), "disk_used_gb")
     # Network percentage is optional because the supplied agent doesn't send it.
     network = _percent(_value(data, "network", "rede", default=0), "network")
     measured_at = _metric_timestamp(data)
@@ -92,6 +108,7 @@ def process_monitoring(data):
         db.session.add(Metric(
             server_id=server.id, cpu_percent=cpu,
             memory_percent=memory, disk_percent=disk,
+            disk_total_gb=disk_total_gb, disk_used_gb=disk_used_gb,
             network_percent=network, timestamp=measured_at,
         ))
         created, resolved = sync_metric_alerts(server.id, {

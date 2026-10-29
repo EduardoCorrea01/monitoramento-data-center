@@ -278,6 +278,8 @@ JSON de exemplo exatamente no formato esperado pelo guia:
 
 Obrigatórios: `servidor` (ou `server`), `ip`, `cpu`, `memoria` (ou `memory`),
 `disco` (ou `disk`). Os percentuais precisam ser números de 0 a 100.
+Opcionalmente, envie `disk_total_gb` e `disk_used_gb` como números em GB; ambos
+são armazenados e devolvidos pela consulta de métricas.
 Opcionais: `rede`/`network` (se ausente fica **0, valor padrão**, **não uma
 medição real**), `data_hora`/`timestamp`, `sistema_operacional` e `status=ONLINE`.
 Uma leitura válida implica ONLINE; não envie `status=OFFLINE` na rota de dados:

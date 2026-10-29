@@ -40,6 +40,10 @@ def list_metrics():
         "cpu_percent": float(metric.cpu_percent),
         "memory_percent": float(metric.memory_percent),
         "disk_percent": float(metric.disk_percent),
+        "disk_total_gb": (float(metric.disk_total_gb)
+                           if metric.disk_total_gb is not None else None),
+        "disk_used_gb": (float(metric.disk_used_gb)
+                          if metric.disk_used_gb is not None else None),
         "network_percent": float(metric.network_percent),
         "timestamp": metric.timestamp.isoformat(),
     } for metric in metrics]), 200

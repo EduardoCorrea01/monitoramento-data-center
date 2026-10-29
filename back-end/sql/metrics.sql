@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS metrics (
     cpu_percent DECIMAL(5,2) NOT NULL,
     memory_percent DECIMAL(5,2) NOT NULL,
     disk_percent DECIMAL(5,2) NOT NULL,
+    disk_total_gb DECIMAL(10,2) NULL,
+    disk_used_gb DECIMAL(10,2) NULL,
     network_percent DECIMAL(5,2) NOT NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_metrics_servers

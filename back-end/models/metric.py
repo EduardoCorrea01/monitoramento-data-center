@@ -15,6 +15,8 @@ class Metric(db.Model):
     cpu_percent = db.Column(db.Numeric(5, 2), nullable=False)
     memory_percent = db.Column(db.Numeric(5, 2), nullable=False)
     disk_percent = db.Column(db.Numeric(5, 2), nullable=False)
+    disk_total_gb = db.Column(db.Numeric(10, 2), nullable=True)
+    disk_used_gb = db.Column(db.Numeric(10, 2), nullable=True)
     network_percent = db.Column(db.Numeric(5, 2), nullable=False, default=0)
     timestamp = db.Column(
         db.DateTime,

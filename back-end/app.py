@@ -33,4 +33,4 @@ def create_app(config_object=Config):
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=app.config["API_PORT"], debug=app.config["DEBUG"])
+    app.run(host="0.0.0.0", port=app.config["API_PORT"])
