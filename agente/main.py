@@ -12,7 +12,7 @@ AGENTE_ID = platform.node()
 INTERVALO_COLETA = 30
 
 # Endereço da API central
-BACKEND_URL = "http://192.168.56.20:5000/monitoramento"
+BACKEND_URL = "http://192.168.56.20/monitoramento"
 
 
 # -=-=-=- FUNÇÃO DE COLETA PRINCIPAL -=-=-=-
@@ -88,11 +88,11 @@ def coletar_dados_sistema():
 def montar_payload(d):
     m = d["metricas"]
     return {
-        "servidor": AGENTE_ID,
+        "server_id": AGENTE_ID,
         "ip": d["ip_agente"],
         "cpu": m["cpu"]["uso_porcentagem"],
-        "memoria": m["memoria_ram"]["uso_porcentagem"],
-        "disco": m["disco"]["uso_porcentagem"],
+        "memory": m["memoria_ram"]["uso_porcentagem"],
+        "disk_percent": m["disco"]["uso_porcentagem"],
         "disk_total_gb": m["disco"]["total_gb"],
         "disk_used_gb": m["disco"]["em_uso_gb"],
         "sistema_operacional": d["sistema_operacional"],
