@@ -9,11 +9,11 @@ import requests
 
 # -=-=-=- CONFIGURAÇÕES BÁSICAS -=-=-=-
 AGENTE_ID = platform.node()
-INTERVALO_COLETA = 5
+INTERVALO_COLETA = 30
 
 # Endereço da API central
 BACKEND_URL = "http://192.168.56.20:5000/monitoramento"
-AGENTE_IP = "192.168.56.11"  # IP desta VM
+
 
 # -=-=-=- FUNÇÃO DE COLETA PRINCIPAL -=-=-=-
 def coletar_dados_sistema():
@@ -89,10 +89,12 @@ def montar_payload(d):
     m = d["metricas"]
     return {
         "servidor": AGENTE_ID,
-        "ip": AGENTE_IP,
+        "ip": d["ip_agente"],
         "cpu": m["cpu"]["uso_porcentagem"],
         "memoria": m["memoria_ram"]["uso_porcentagem"],
         "disco": m["disco"]["uso_porcentagem"],
+        "disk_total_gb": m["disco"]["total_gb"],
+        "disk_used_gb": m["disco"]["em_uso_gb"],
         "sistema_operacional": d["sistema_operacional"],
         "timestamp": d["timestamp"],
         "status": "ONLINE"
@@ -102,7 +104,6 @@ def montar_payload(d):
 # -=-=-=- EXECUÇÃO PRINCIPAL -=-=-=-
 def main():
     print(f"Iniciando Agente de Monitoramento: {AGENTE_ID}")
-    print(f"IP do agente: {AGENTE_IP}")
     print(f"API: {BACKEND_URL}")
     print("Pressione Ctrl+C para interromper.\n")
 
@@ -111,6 +112,7 @@ def main():
             payload = coletar_dados_sistema()
 
             print(f"[{payload['timestamp']}] Dados coletados:")
+            print(f"IP do agente: {payload['ip_agente']}")
             print(json.dumps(payload, indent=2, ensure_ascii=False))
 
             # Envio dos dados para o Backend
